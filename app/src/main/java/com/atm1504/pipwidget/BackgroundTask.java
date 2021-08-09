@@ -5,10 +5,17 @@ import android.os.CountDownTimer;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.work.Worker;
 import androidx.work.WorkerParameters;
+
+import java.util.List;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class BackgroundTask extends Worker {
     public BackgroundTask(
@@ -32,7 +39,8 @@ public class BackgroundTask extends Worker {
                 mHandler.postDelayed(new Runnable() {
                     @Override
                     public void run() {
-                        RunTimer();
+                        // RunTimer();
+                        makeApiCall();
                         runLongLoop();
                     }
                 }, 10000);
@@ -54,6 +62,26 @@ public class BackgroundTask extends Worker {
             }
 
         }.start();
+    }
+
+    public  void makeApiCall(){
+        Call<List<User>> call = RetrofitClient.getInstance().getMyApi().getUsers();
+        call.enqueue(new Callback<List<User>>() {
+            @Override
+            public void onResponse(Call<List<User>> call, Response<List<User>> response) {
+                List<User> myheroList = response.body();
+//                String[] oneHeroes = new String[myheroList.size()];
+
+                Log.d("ATM", "Got response from server successfully");
+                Log.d("ATM",myheroList.toString());
+            }
+
+            @Override
+            public void onFailure(Call<List<User>> call, Throwable t) {
+                Log.d("ATM", "Failed to fetch data from internet");
+            }
+
+        });
     }
 
 }
